@@ -27,9 +27,17 @@ hce.sig <- hce[hce > 5 & hce < 130500]
 
 ################
 
-ks.test(rnorm(1000,mean = 1, sd = 1)-1,"pnorm")
+# ks.test(rnorm(1000,mean = 1, sd = 1)-1,"pnorm")
 
-ks.test((log(hce) + rnorm(length(hce),5,1) - 14.23876)/1.6228533,"pnorm")
+G <- boxcox(hce.sig ~ 1)
+# G <- VGAM::yeo.johnson(bc.hce, 2)
+lmb <- G$x[which.max(G$y)]
+bc.hce <- (hce^lmb - 1)/lmb
+MASS::fitdistr(bc.hce, "normal") -> param
+M <- param$estimate[1]
+S <- param$estimate[2]
+
+ks.test((bc.hce + rnorm(length(bc.hce),1,sd = sqrt(S^2 / 2)) - M - 1)/sqrt(S^2 + S^2 / 2), "pnorm")
 
 
 for(i in 1:1000){
