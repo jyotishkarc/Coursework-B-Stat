@@ -29,16 +29,25 @@ hce.sig <- hce[hce > 5 & hce < 130500]
 
 # ks.test(rnorm(1000,mean = 1, sd = 1)-1,"pnorm")
 
-G <- boxcox(hce.sig ~ 1)
-# G <- VGAM::yeo.johnson(bc.hce, 2)
-lmb <- G$x[which.max(G$y)]
-bc.hce <- (hce^lmb - 1)/lmb
-MASS::fitdistr(bc.hce, "normal") -> param
-M <- param$estimate[1]
-S <- param$estimate[2]
+#### Box-Cox Transformation
+if(FALSE){
+   G <- boxcox(hce.sig ~ 1)
+   lmb <- G$x[which.max(G$y)]
+   tr.hce <- (hce.sig^lmb - 1)/lmb
+}
 
-ks.test((bc.hce + rnorm(length(bc.hce),1,sd = sqrt(S^2 / 2)) - M - 1)/sqrt(S^2 + S^2 / 2), "pnorm")
-
+if(TRUE){
+   if(TRUE) {
+      tr.hce <- G <- VGAM::yeo.johnson(hce.sig, 0.01)
+   }
+   
+   MASS::fitdistr(tr.hce, "normal") -> param
+   M <- param$estimate[1]
+   S <- param$estimate[2]
+   
+   ks.test((tr.hce + rnorm(length(tr.hce), 1, sd = sqrt(S^2/10))-M-1)/sqrt(S^2+S^2/10),
+           "pnorm")
+}
 
 for(i in 1:1000){
    J <- ks.test((log(hce.sig) + rnorm(length(hce.sig),1,sd = sqrt(V/10)) - M - 1)/sqrt(V+V/10),
