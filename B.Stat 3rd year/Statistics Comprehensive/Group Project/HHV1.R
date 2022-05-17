@@ -56,7 +56,7 @@ for(i in 1:4) {
 # ks.test(rnorm(1000,mean = 1, sd = 1)-1,"pnorm")
 
 #### Box-Cox Transformation
-if(TRUE){
+if(FALSE){
    G <- boxcox(hce.sig ~ 1)
    lmb <- G$x[which.max(G$y)]
    tr.hce <- (hce.sig^lmb - 1)/lmb
@@ -64,7 +64,7 @@ if(TRUE){
 
 if(TRUE){
    if(TRUE) {
-      tr.hce <- G <- VGAM::yeo.johnson(hce.sig, 0.01)
+      tr.hce <- G <- VGAM::yeo.johnson(hce.sig, 0.055)
    }
    
    MASS::fitdistr(tr.hce, "normal") -> param
@@ -73,14 +73,14 @@ if(TRUE){
    
    ks.test((tr.hce + rnorm(length(tr.hce), 
                            mean = 1, 
-                           sd = sqrt(S^2/100))-M-1)/sqrt(S^2+S^2/100), 
+                           sd = sqrt(S^2/10))-M-1)/sqrt(S^2+S^2/10), 
            "pnorm")
 }
 
-for(i in 1:1000){
-   J <- ks.test((log(hce.sig) + rnorm(length(hce.sig),1,sd = sqrt(V/10)) - M - 1)/sqrt(V+V/10),
-                "pnorm")
-   if(J$p.value > 0.05){
-      a <- a+1
-   }
-}
+# for(i in 1:1000){
+#    J <- ks.test((log(hce.sig) + rnorm(length(hce.sig),1,sd = sqrt(V/10)) - M - 1)/sqrt(V+V/10),
+#                 "pnorm")
+#    if(J$p.value > 0.05){
+#       a <- a+1
+#    }
+# }
