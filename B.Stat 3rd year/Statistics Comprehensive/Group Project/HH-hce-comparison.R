@@ -85,7 +85,21 @@ for(i in 1:3){
 
 rm(doc, df, id.c1, id.c2, comm.pos, A, B)
 
+#### Test Statistic
 
+hce.comp <- function(X,Y,c1,c2){
+   
+   sigma.hat <- sqrt(mean(var(c1),var(X),var(Y)))
+   rho.hat <- lm(c2 ~ c1)$coefficients[2] %>% as.numeric()
+   
+   s1 <- (mean(X) - mean(Y))/
+      (sigma.hat * sqrt(1/length(X) + 1/length(Y)))
+   
+   s2 <- sqrt(length(c1)) * (mean(c1) - mean(c2))/
+      (sqrt(2) * sigma.hat * sqrt(1-rho.hat))
+   
+   return((s1 + s2)/sqrt(2))
+}
 
 
 
