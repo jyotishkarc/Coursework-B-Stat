@@ -4,7 +4,7 @@ path <- "D:/My Documents/PLFS-data/FINAL_DATA_2019-20/TEXT/"
 path.files <- list.files(path)
 
 HHV1 <- path %>% paste0(path.files[2]) %>% read.csv(header = FALSE)
-HHV1 <- path %>% paste0(path.files[1]) %>% read.csv(header = FALSE)
+HHRV <- path %>% paste0(path.files[1]) %>% read.csv(header = FALSE)
 
 temp.v1 <- HHV1 %>%
             apply(1, function(val){
