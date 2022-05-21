@@ -109,16 +109,16 @@ rm(doc, df, id.c1, id.c2, comm.pos, A, B)
 
 unemp.comp <- function(X,Y,c1,c2){
    
-   sigma.hat <- sqrt(mean(var(c1),var(X),var(Y)))
-   rho.hat <- lm(c2 ~ c1)$coefficients[2] %>% as.numeric()
+   n <- c1 %>% length()
+   n1 <- which(c1 == 1) %>% length
+   n2 <- which(c2 == 1) %>% length
    
-   s1 <- (mean(X) - mean(Y))/
-      (sigma.hat * sqrt(1/length(X) + 1/length(Y)))
+   rho.hat <- n * (which(c1 + c2 == 2) %>% length - n1 * n2) / 
+                  sqrt(n1 * (n - n1) * n2 * (n - n2))
    
-   s2 <- sqrt(length(c1)) * (mean(c1) - mean(c2))/
-      (sqrt(2) * sigma.hat * sqrt(1-rho.hat))
    
-   return((s1 + s2)/sqrt(2))
+   
+   
 }
 
 
