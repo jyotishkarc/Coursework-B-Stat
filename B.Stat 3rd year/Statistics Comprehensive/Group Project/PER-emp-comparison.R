@@ -39,9 +39,19 @@ for(i in 1:4) {
                                        filter(V9 == i & V11 == j)
       
       for(k in 1:nrow(df)){
-         emp.status[[i]][[j]][k] <- df[k, c(98:99, 124:125, 150:151, 176:177,
-                                       202:203, 228:229, 254:255)] %>% paste0() %>% 
-                                    stringr::str_c(collapse = "")
+         if(j == 1){
+            emp.status[[i]][[j]][k] <- df[k, c(98:99, 124:125, 150:151, 176:177,
+                                               202:203, 228:229, 254:255)] %>% 
+                                          paste0() %>% 
+                                          stringr::str_c(collapse = "")
+         }
+         
+         if(j > 1){
+            emp.status[[i]][[j]][k] <- df[k, c(54:55, 80:81, 106:107, 132:133,
+                                               158:159, 184:185, 210:211)] %>% 
+                                          paste0() %>% 
+                                          stringr::str_c(collapse = "")
+         }
          
          if(emp.status[[i]][[j]][k] == "81818181818181"){
             unemp[[i]][[j]][k] <- 1
@@ -52,7 +62,7 @@ for(i in 1:4) {
                                     stringr::str_c(collapse = "")
       }
       
-      print(j)
+      print(paste0(i," ",j))
    }
 }
 
