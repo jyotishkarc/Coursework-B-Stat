@@ -27,7 +27,7 @@ temp.urban.rv <- temp.rv %>% as.data.frame() %>% filter(V12 == 2)
 temp.qivj <- emp.status <- unemp <- id.qivj <- list()
 
 for(i in 1:4) {
-   temp.qivj[[i]] <- emp.status[[i]] <- unemp[[i]] <- id.qivj[[i]] <- list()
+   emp.status[[i]] <- unemp[[i]] <- id.qivj[[i]] <- list()
    
    for(j in 1:4){
       if(j == 1){doc <- temp.urban.v1}
@@ -35,8 +35,8 @@ for(i in 1:4) {
       
       emp.status[[i]][[j]] <- unemp[[i]][[j]] <- id.qivj[[i]][[j]] <- 0
       
-      df <- temp.qivj[[i]][[j]] <- doc %>% as.data.frame() %>% 
-                                       filter(V9 == i & V11 == j)
+      df <- doc %>% as.data.frame() %>% 
+               filter(V9 == i & V11 == j)
       
       for(k in 1:nrow(df)){
          if(j == 1){
@@ -107,16 +107,31 @@ for(i in 1:3){
 rm(doc, df, id.c1, id.c2, comm.pos, A, B)
 
 
-unemp.comp <- function(X,Y,c1,c2){
+unemp.comp <- function(X,Y,c1,c2,f = NULL){
+   
+   # if(is.null(f) == FALSE){
+   #    X <- f(X)
+   #    Y <- f(Y)
+   #    c1 <- f(c1)
+   #    c2 <- f(c2)
+   # }
    
    n <- c1 %>% length()
-   n1 <- which(c1 == 1) %>% length
-   n2 <- which(c2 == 1) %>% length
+   n1 <- which(c1 == 1) %>% length()
+   n2 <- which(c2 == 1) %>% length()
    
-   rho.hat <- n * (which(c1 + c2 == 2) %>% length - n1 * n2) / 
+   sigma.hat <- sqrt(mean(var(c1),var(X),var(Y)))
+   
+   rho.hat <- n * (which((c1 + c2) == 2) %>% length() - n1 * n2) / 
                   sqrt(n1 * (n - n1) * n2 * (n - n2))
    
+   s1 <- (mean(X) - mean(Y))/
+      (sigma.hat * sqrt(1/length(X) + 1/length(Y)))
    
+   s2 <- sqrt(length(c1)) * (mean(c1) - mean(c2))/
+      (sqrt(2) * sigma.hat * sqrt(1-rho.hat))
+   
+   return((s1 + s2)/sqrt(2))
    
    
 }
