@@ -22,12 +22,18 @@ colnames(temp.v1) <- c(1:ncol(temp.v1)) %>%
 colnames(temp.rv) <- c(1:ncol(temp.rv)) %>% 
                         sapply(function(val) paste0("V",val))
 
-temp.urban.v1 <- temp.v1 %>% as.data.frame() %>% 
-                     filter(V12 == "2" & V46 == "1") %>%
-                     filter(V47 == "1" | V47 == "2" | V47 == "3") 
-temp.urban.rv <- temp.rv %>% as.data.frame() %>% 
-                     filter(V12 == "2" & V46 == "1") %>%
-                     filter(V47 == "1" | V47 == "2" | V47 == "3")
+temp.urban.v1 <- temp.v1 %>% as.data.frame() %>% filter(V12 == "2")
+temp.urban.rv <- temp.rv %>% as.data.frame() %>% filter(V12 == "2")
+
+if(TRUE){
+   temp.urban.v1 <- temp.v1 %>% as.data.frame() %>%
+                        filter(V12 == "2" & V46 == "1") %>%
+                        filter(V47 == "1" | V47 == "2" | V47 == "3")
+   temp.urban.rv <- temp.rv %>% as.data.frame() %>%
+                        filter(V12 == "2" & V46 == "1") %>%
+                        filter(V47 == "1" | V47 == "2" | V47 == "3")
+}
+
 
 ##########
 
@@ -86,7 +92,7 @@ for(i in 1:4) {
    }
    
    toc()
-   if(i == 4) beepr::beep(1)
+   if(i %% 2 == 0) beepr::beep(1)
 }
 
 
@@ -151,7 +157,7 @@ unemp.comp <- function(X,Y,c1,c2,f = NULL){
    
    temp.1 <- c(X,Y)
    temp.U.1 <- which(temp.1 == "U") %>% length()
-   sigma.hat.1 <- sqrt(temp.U.1 * (length(temp.1) - temp.U.1) / length(temp.1)^2)
+   sigma.hat.1 <- sqrt(temp.U.1) * sqrt(length(temp.1) - temp.U.1) / length(temp.1)
    
    temp.2 <- c(c1,c2)
    temp.U.2 <- which(temp.2 == "U") %>% length()
