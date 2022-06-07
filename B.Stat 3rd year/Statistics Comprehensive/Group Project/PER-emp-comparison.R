@@ -1,5 +1,6 @@
 library(dplyr)
 library(tictoc)
+library(beepr)
 
 path <- "D:/My Documents/PLFS-data/FINAL_DATA_2019-20/TEXT/"
 path.files <- list.files(path)
@@ -12,10 +13,14 @@ temp.v1 <- PERV1 %>%
       return(val %>% strsplit(split = "") %>% unlist())
    }) %>% t()
 
+beep()
+
 temp.rv <- PERRV %>%
    apply(1, function(val){
       return(val %>% strsplit(split = "") %>% unlist())
    }) %>% t()
+
+beep()
 
 colnames(temp.v1) <- c(1:ncol(temp.v1)) %>% 
                         sapply(function(val) paste0("V",val))
@@ -25,12 +30,14 @@ colnames(temp.rv) <- c(1:ncol(temp.rv)) %>%
 temp.urban.v1 <- temp.v1 %>% as.data.frame() %>% filter(V12 == "2")
 temp.urban.rv <- temp.rv %>% as.data.frame() %>% filter(V12 == "2")
 
-if(TRUE){
+beep()
+
+if(FALSE){
    temp.urban.v1 <- temp.v1 %>% as.data.frame() %>%
-                        filter(V12 == "2" & V46 == "1") %>%
+                        filter(V12 == "2" & V46 == "1") %>% ## Education
                         filter(V47 == "1" | V47 == "2" | V47 == "3")
    temp.urban.rv <- temp.rv %>% as.data.frame() %>%
-                        filter(V12 == "2" & V46 == "1") %>%
+                        filter(V12 == "2" & V46 == "1") %>% ## Education
                         filter(V47 == "1" | V47 == "2" | V47 == "3")
 }
 
@@ -44,9 +51,9 @@ for(i in 1:4) {
    
    emp.status[[i]] <- unemp[[i]] <- id.qivj[[i]] <- list()
    
-   for(j in 1:4){
-      if(j == 1){doc <- temp.urban.v1}
-      if(j > 1){doc <- temp.urban.rv}
+   for(j in 1:4){ #################### Gender filter
+      if(j == 1){doc <- temp.urban.v1 %>% filter(V41 == "3")}
+      if(j > 1){doc <- temp.urban.rv  %>% filter(V41 == "3")}
       
       emp.status[[i]][[j]] <- unemp[[i]][[j]] <- id.qivj[[i]][[j]] <- 0
       
@@ -155,29 +162,34 @@ unemp.comp <- function(X,Y,c1,c2,f = NULL){
    n.X <- which(X == "U") %>% length()
    n.Y <- which(Y == "U") %>% length()
    
-   temp.1 <- c(X,Y)
-   temp.U.1 <- which(temp.1 == "U") %>% length()
-   sigma.hat.1 <- sqrt(temp.U.1) * sqrt(length(temp.1) - temp.U.1) / length(temp.1)
+   c1.bar <- n1 / n
+   c2.bar <- n2 / n
+   X.bar <- n.X / length(X)
+   Y.bar <- n.Y / length(Y)
    
-   temp.2 <- c(c1,c2)
-   temp.U.2 <- which(temp.2 == "U") %>% length()
-   sigma.hat.2 <- sqrt(temp.U.2) * sqrt(length(temp.2) - temp.U.2) / length(temp.2)
+   p.hat <- (n.X + n.Y + n1)/(length(X) + length(Y) + n)
+   sigma.hat <- sqrt(p.hat * (1 - p.hat))
    
-   
-   rho.hat.num <- n * nrow(U) - n1 * n2
-   rho.hat.denom <- sqrt(n1) * sqrt(n - n1) * sqrt(n2) * sqrt(n - n2)
+   rho.hat.num <- nrow(U)/n - c1.bar * c2.bar
+   rho.hat.denom <- sqrt(c1.bar) * sqrt(1 - c1.bar) * sqrt(c2.bar) * sqrt(1 - c2.bar)
    rho.hat <- rho.hat.num / rho.hat.denom
-                  
+   
+   # temp.1 <- c(X,Y)
+   # temp.U.1 <- which(temp.1 == "U") %>% length()
+   # sigma.hat.1 <- sqrt(temp.U.1) * sqrt(length(temp.1) - temp.U.1) / length(temp.1)
+   # 
+   # temp.2 <- c(c1,c2)
+   # temp.U.2 <- which(temp.2 == "U") %>% length()
+   # sigma.hat.2 <- sqrt(temp.U.2) * sqrt(length(temp.2) - temp.U.2) / length(temp.2)
    
    
-   s1 <- (n.X/length(X) - n.Y/length(Y))/
-      (sigma.hat.1 * sqrt(1/length(X) + 1/length(Y)))
    
    
-   s2 <- (n1 - n2)/(sqrt(2*n) * sigma.hat.2 * sqrt(1-rho.hat))
+   s1 <- (X.bar - Y.bar) / (sigma.hat * sqrt(1/length(X) + 1/length(Y)))
+   s2 <- sqrt(n) * (c1.bar - c2.bar) / (sigma.hat * sqrt(2*(1 - rho.hat)))
    
-   return(list("sigma.hat.1" = sigma.hat.1, "sigma.hat.2" = sigma.hat.2,
-               "rho.hat" = rho.hat, "s1" = s1, "s2" = s2, 
+   return(list("sigma.hat" = sigma.hat, "rho.hat" = rho.hat, 
+               "s1" = s1, "s2" = s2, 
                "statistic" = (s1 + s2)/sqrt(2)))
 }
 
@@ -185,17 +197,17 @@ unemp.comp <- function(X,Y,c1,c2,f = NULL){
 X <- E.1.2$X
 Y <- E.1.2$Y
 c1 <-E.1.2$c1
-c2<- E.1.2$c2
+c2 <- E.1.2$c2
 
 X <- E.2.3$X
 Y <- E.2.3$Y
 c1 <-E.2.3$c1
-c2<- E.2.3$c2
+c2 <- E.2.3$c2
 
 X <- E.3.4$X
 Y <- E.3.4$Y
 c1 <-E.3.4$c1
-c2<- E.3.4$c2
+c2 <- E.3.4$c2
 
 
 
