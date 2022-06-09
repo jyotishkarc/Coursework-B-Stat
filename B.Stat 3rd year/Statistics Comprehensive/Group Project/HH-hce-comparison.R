@@ -6,21 +6,21 @@ path.files <- list.files(path)
 HHV1 <- path %>% paste0(path.files[2]) %>% read.csv(header = FALSE)
 HHRV <- path %>% paste0(path.files[1]) %>% read.csv(header = FALSE)
 
-temp.v1 <- HHV1 %>%
+temp.hce.v1 <- HHV1 %>%
    apply(1, function(val){
       return(val %>% strsplit(split = "") %>% unlist())
    }) %>% t()
 
-temp.rv <- HHRV %>%
+temp.hce.rv <- HHRV %>%
    apply(1, function(val){
       return(val %>% strsplit(split = "") %>% unlist())
    }) %>% t()
 
-colnames(temp.v1) <- colnames(temp.rv) <- c(1:ncol(temp.v1)) %>% 
+colnames(temp.hce.v1) <- colnames(temp.hce.rv) <- c(1:ncol(temp.hce.v1)) %>% 
    sapply(function(val) paste0("V",val))
 
-temp.urban.v1 <- temp.v1 %>% as.data.frame() %>% filter(V12 == 2)
-temp.urban.rv <- temp.rv %>% as.data.frame() %>% filter(V12 == 2)
+temp.urban.hce.v1 <- temp.hce.v1 %>% as.data.frame() %>% filter(V12 == 2)
+temp.urban.hce.rv <- temp.hce.rv %>% as.data.frame() %>% filter(V12 == 2)
 
 temp.qivj <- hce <- id.qivj <- list()
 
@@ -28,8 +28,8 @@ for(i in 1:4) {
    hce[[i]] <- temp.qivj[[i]] <- id.qivj[[i]] <- list()
    
    for(j in 1:4){
-      if(j == 1){doc <- temp.urban.v1}
-      if(j > 1){doc <- temp.urban.rv}
+      if(j == 1){doc <- temp.urban.hce.v1}
+      if(j > 1){doc <- temp.urban.hce.rv}
       
       hce[[i]][[j]] <- id.qivj[[i]][[j]] <- 0
       
@@ -45,8 +45,10 @@ for(i in 1:4) {
             stringr::str_c(collapse = "")
       }
       
-      print(j)
+      print(paste0(i," ",j))
    }
+   
+   beepr::beep(10)
 }
 
 Q.1.2 <- Q.2.3 <- Q.3.4 <- list()
@@ -85,22 +87,45 @@ for(i in 1:3){
 
 rm(doc, df, id.c1, id.c2, comm.pos, A, B)
 
-#### Test Statistic
 
-hce.comp <- function(X,Y,c1,c2){
+hce.comp <- function(X,Y,c1,c2,f = NULL){
    
-   sigma.hat <- sqrt(mean(var(c1),var(X),var(Y)))
-   rho.hat <- lm(c2 ~ c1)$coefficients[2] %>% as.numeric()
+   if(is.null(f) == FALSE){
+      X <- f(X)
+      Y <- f(Y)
+      c1 <- f(c1)
+      c2 <- f(c2)
+   }
    
-   s1 <- (mean(X) - mean(Y))/
-      (sigma.hat * sqrt(1/length(X) + 1/length(Y)))
+   n <- c1 %>% length()
    
-   s2 <- sqrt(length(c1)) * (mean(c1) - mean(c2))/
-      (sqrt(2) * sigma.hat * sqrt(1-rho.hat))
+   c1.bar <- sum(c1) / n
+   c2.bar <- sum(c2) / n
+   X.bar <- sum(X) / length(X)
+   Y.bar <- sum(Y) / length(Y)
    
-   return((s1 + s2)/sqrt(2))
+   sigma.hat <- sqrt((sum((X - X.bar)^2) + sum((Y - Y.bar)^2) + sum((c1 - c1.bar)^2))/(length(X) + length(Y) + n - 3))
+   
+   rho.hat <- sum((c1 - c1.bar) * (c2 - c2.bar))/(n * sigma.hat^2)
+   
+   if(rho.hat > 0.9999) {
+      rho.hat <- 0.9999
+   }
+   
+   s1 <- (X.bar - Y.bar) / (sigma.hat * sqrt(1/length(X) + 1/length(Y)))
+   s2 <- sqrt(n) * (c1.bar - c2.bar) / (sigma.hat * sqrt(2*(1 - rho.hat)))
+   
+   statistic <- (s1 + s2)/sqrt(2)
+   
+   if(statistic < 0){p.value <- 2 * pnorm(statistic)}
+   if(statistic >= 0){p.value <- 2 *(1 - pnorm(statistic))}
+   
+   
+   return(list("sigma.hat" = sigma.hat, "rho.hat" = rho.hat, 
+               "s1" = s1, "s2" = s2, 
+               "statistic" = statistic,
+               "p-value" = p.value))
 }
-
 
 
 # hce.sig <- hce[hce > 5 & hce < 130500]
