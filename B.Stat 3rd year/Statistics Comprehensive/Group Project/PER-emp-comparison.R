@@ -52,8 +52,10 @@ for(i in 1:4) {
    emp.status[[i]] <- unemp[[i]] <- id.qivj[[i]] <- list()
    
    for(j in 1:4){ #################### Gender filter
-      if(j == 1){doc <- temp.urban.v1 %>% filter(V41 == "3")}
-      if(j > 1){doc <- temp.urban.rv  %>% filter(V41 == "3")}
+      if(j == 1){doc <- temp.urban.v1# %>% filter(V41 == "2")
+      }
+      if(j > 1){doc <- temp.urban.rv#  %>% filter(V41 == "2")
+      }
       
       emp.status[[i]][[j]] <- unemp[[i]][[j]] <- id.qivj[[i]][[j]] <- 0
       
@@ -172,7 +174,15 @@ unemp.comp <- function(X,Y,c1,c2,f = NULL){
    
    rho.hat.num <- nrow(U)/n - c1.bar * c2.bar
    rho.hat.denom <- sqrt(c1.bar) * sqrt(1 - c1.bar) * sqrt(c2.bar) * sqrt(1 - c2.bar)
+   
    rho.hat <- rho.hat.num / rho.hat.denom
+   
+   if(rho.hat.denom == 0){
+      rho.hat <- 0
+   }
+   if(rho.hat > 0.9999) {
+      rho.hat <- 0.9999
+   }
    
    # temp.1 <- c(X,Y)
    # temp.U.1 <- which(temp.1 == "U") %>% length()
@@ -182,15 +192,21 @@ unemp.comp <- function(X,Y,c1,c2,f = NULL){
    # temp.U.2 <- which(temp.2 == "U") %>% length()
    # sigma.hat.2 <- sqrt(temp.U.2) * sqrt(length(temp.2) - temp.U.2) / length(temp.2)
    
-   
-   
+   # if(rho.hat == NaN) {rho.hat <- 0.99}
    
    s1 <- (X.bar - Y.bar) / (sigma.hat * sqrt(1/length(X) + 1/length(Y)))
    s2 <- sqrt(n) * (c1.bar - c2.bar) / (sigma.hat * sqrt(2*(1 - rho.hat)))
    
+   statistic <- (s1 + s2)/sqrt(2)
+   
+   if(statistic < 0){p.value <- 2 * pnorm(statistic)}
+   if(statistic >= 0){p.value <- 2 *(1 - pnorm(statistic))}
+   
+   
    return(list("sigma.hat" = sigma.hat, "rho.hat" = rho.hat, 
                "s1" = s1, "s2" = s2, 
-               "statistic" = (s1 + s2)/sqrt(2)))
+               "statistic" = statistic,
+               "p-value" = p.value))
 }
 
 
